@@ -551,7 +551,7 @@ export namespace Provider {
         const providerConfig = (yield* dep.config()).provider?.["gitlab"]
 
         const aiGatewayHeaders = {
-          "User-Agent": `opencode/${Installation.VERSION} gitlab-ai-provider/${GITLAB_PROVIDER_VERSION} (${os.platform()} ${os.release()}; ${os.arch()})`,
+          "User-Agent": `tartarus/${Installation.VERSION} gitlab-ai-provider/${GITLAB_PROVIDER_VERSION} (${os.platform()} ${os.release()}; ${os.arch()})`,
           "anthropic-beta": "context-1m-2025-08-07",
           ...(providerConfig?.options?.aiGatewayHeaders || {}),
         }
@@ -705,7 +705,7 @@ export namespace Provider {
           options: {
             apiKey,
             headers: {
-              "User-Agent": `opencode/${Installation.VERSION} cloudflare-workers-ai (${os.platform()} ${os.release()}; ${os.arch()})`,
+              "User-Agent": `tartarus/${Installation.VERSION} cloudflare-workers-ai (${os.platform()} ${os.release()}; ${os.arch()})`,
             },
           },
           async getModel(sdk: any, modelID: string) {
@@ -777,7 +777,7 @@ export namespace Provider {
           skipCache: input.options?.skipCache,
           collectLog: input.options?.collectLog,
           headers: {
-            "User-Agent": `opencode/${Installation.VERSION} cloudflare-ai-gateway (${os.platform()} ${os.release()}; ${os.arch()})`,
+            "User-Agent": `tartarus/${Installation.VERSION} cloudflare-ai-gateway (${os.platform()} ${os.release()}; ${os.arch()})`,
           },
         }
 

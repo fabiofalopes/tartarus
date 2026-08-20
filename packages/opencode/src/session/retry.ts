@@ -57,7 +57,6 @@ export namespace SessionRetry {
     if (MessageV2.ContextOverflowError.isInstance(error)) return undefined
     if (MessageV2.APIError.isInstance(error)) {
       if (!error.data.isRetryable) return undefined
-      if (error.data.responseBody?.includes("FreeUsageLimitError")) return GO_UPSELL_MESSAGE
       return error.data.message.includes("Overloaded") ? "Provider is overloaded" : error.data.message
     }
 

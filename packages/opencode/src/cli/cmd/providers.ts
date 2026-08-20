@@ -278,7 +278,7 @@ export const ProvidersLoginCommand = cmd({
   builder: (yargs) =>
     yargs
       .positional("url", {
-        describe: "opencode auth provider",
+        describe: "tartarus auth provider",
         type: "string",
       })
       .option("provider", {

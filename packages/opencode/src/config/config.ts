@@ -60,11 +60,11 @@ export namespace Config {
   function systemManagedConfigDir(): string {
     switch (process.platform) {
       case "darwin":
-        return "/Library/Application Support/opencode"
+        return "/Library/Application Support/tartarus"
       case "win32":
-        return path.join(process.env.ProgramData || "C:\\ProgramData", "opencode")
+        return path.join(process.env.ProgramData || "C:\\ProgramData", "tartarus")
       default:
-        return "/etc/opencode"
+        return "/etc/tartarus"
     }
   }
 
@@ -1085,7 +1085,7 @@ export namespace Config {
   export class Service extends Context.Service<Service, Interface>()("@opencode/Config") {}
 
   function globalConfigFile() {
-    const candidates = ["opencode.jsonc", "opencode.json", "config.json"].map((file) =>
+    const candidates = ["tartarus.jsonc", "tartarus.json", "config.json"].map((file) =>
       path.join(Global.Path.config, file),
     )
     for (const file of candidates) {
@@ -1239,8 +1239,8 @@ export namespace Config {
           let result: Info = pipe(
             {},
             mergeDeep(yield* loadFile(path.join(Global.Path.config, "config.json"))),
-            mergeDeep(yield* loadFile(path.join(Global.Path.config, "opencode.json"))),
-            mergeDeep(yield* loadFile(path.join(Global.Path.config, "opencode.jsonc"))),
+            mergeDeep(yield* loadFile(path.join(Global.Path.config, "tartarus.json"))),
+            mergeDeep(yield* loadFile(path.join(Global.Path.config, "tartarus.jsonc"))),
           )
 
           const legacy = path.join(Global.Path.config, "config")
@@ -1410,7 +1410,7 @@ export namespace Config {
 
           if (!Flag.OPENCODE_DISABLE_PROJECT_CONFIG) {
             for (const file of yield* Effect.promise(() =>
-              ConfigPaths.projectFiles("opencode", ctx.directory, ctx.worktree),
+              ConfigPaths.projectFiles("tartarus", ctx.directory, ctx.worktree),
             )) {
               yield* merge(file, yield* loadFile(file), "local")
             }
@@ -1429,8 +1429,8 @@ export namespace Config {
           const deps: Fiber.Fiber<void, never>[] = []
 
           for (const dir of unique(directories)) {
-            if (dir.endsWith(".opencode") || dir === Flag.OPENCODE_CONFIG_DIR) {
-              for (const file of ["opencode.json", "opencode.jsonc"]) {
+            if (dir.endsWith(".tartarus") || dir === Flag.OPENCODE_CONFIG_DIR) {
+              for (const file of ["tartarus.json", "tartarus.jsonc"]) {
                 const source = path.join(dir, file)
                 log.debug(`loading config from ${source}`)
                 yield* merge(source, yield* loadFile(source))

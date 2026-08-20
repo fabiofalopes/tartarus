@@ -372,7 +372,7 @@ export namespace LLM {
           : {
               "x-session-affinity": input.sessionID,
               ...(input.parentSessionID ? { "x-parent-session-id": input.parentSessionID } : {}),
-              "User-Agent": `opencode/${Installation.VERSION}`,
+              "User-Agent": `tartarus/${Installation.VERSION}`,
             }),
         ...input.model.headers,
         ...headers,
