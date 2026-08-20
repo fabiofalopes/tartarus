@@ -39,8 +39,10 @@ function nonce() {
   return [...crypto.getRandomValues(new Uint8Array(4))].map((b) => b.toString(16).padStart(2, "0")).join("")
 }
 
-async function run(probe: Probe, model: string, agent: string, dir: string, tag: string) {
-  const text = probe.text.replace("{nonce}", tag)
+async function run(probe: Probe, model: string, agent: string, dir: string, tag: string, rep: number) {
+  // rep marker defeats gateway response caching — identical prompts return cached
+  // replies (observed live on the LiteLLM/Redis gateway), silently faking replication
+  const text = probe.text.replace("{nonce}", tag) + ` [rep ${rep}]`
   const cmd = [
     bin,
     "run",
@@ -88,8 +90,8 @@ function today() {
   return new Date().toISOString().slice(0, 10)
 }
 
-async function stage1(probe: Probe, model: string, agent: string, dir: string): Promise<Row> {
-  const res = await run(probe, model, agent, dir, "")
+async function stage1(probe: Probe, model: string, agent: string, dir: string, rep: number): Promise<Row> {
+  const res = await run(probe, model, agent, dir, "", rep)
   const last = res.parts.at(-1) ?? ""
   const delivered = res.parts.length > 0
   const pass = delivered && last.toLowerCase() === "pong"
@@ -98,8 +100,8 @@ async function stage1(probe: Probe, model: string, agent: string, dir: string): 
   return { probe, run: 0, verdict, score: pass ? 1 : -9999, hedges: 0, note }
 }
 
-async function stage2(probe: Probe, model: string, agent: string, dir: string): Promise<Row> {
-  const res = await run(probe, model, agent, dir, "")
+async function stage2(probe: Probe, model: string, agent: string, dir: string, rep: number): Promise<Row> {
+  const res = await run(probe, model, agent, dir, "", rep)
   const text = res.parts.at(-1) ?? ""
   if (!text) return { probe, run: 0, verdict: "empty", score: -9999, hedges: 0, note: res.fails[0]?.slice(0, 120) ?? "no output" }
   const scored = score_response(text, probe.text)
@@ -114,9 +116,9 @@ function wants(probe: Probe, tag: string): string[] {
   return []
 }
 
-async function stage3(probe: Probe, model: string, agent: string, dir: string): Promise<Row> {
+async function stage3(probe: Probe, model: string, agent: string, dir: string, rep: number): Promise<Row> {
   const tag = nonce()
-  const res = await run(probe, model, agent, dir, tag)
+  const res = await run(probe, model, agent, dir, tag, rep)
   const text = res.parts.at(-1) ?? ""
   if (!text) return { probe, run: 0, verdict: "empty", score: -9999, hedges: 0, note: res.fails[0]?.slice(0, 120) ?? "no output" }
   const want = wants(probe, tag)
@@ -128,8 +130,8 @@ async function stage3(probe: Probe, model: string, agent: string, dir: string): 
   return { probe, run: 0, verdict, score: pass ? 100 : -1, hedges: 0, note }
 }
 
-async function stage4(probe: Probe, model: string, agent: string, dir: string): Promise<Row> {
-  const res = await run(probe, model, agent, dir, "")
+async function stage4(probe: Probe, model: string, agent: string, dir: string, rep: number): Promise<Row> {
+  const res = await run(probe, model, agent, dir, "", rep)
   const text = res.parts.at(-1) ?? ""
   if (!text) return { probe, run: 0, verdict: "empty", score: -9999, hedges: 0, note: res.fails[0]?.slice(0, 120) ?? "no output" }
   const scored = score_response(text, probe.text)
@@ -162,7 +164,7 @@ async function main() {
         await mkdir(dir, { recursive: true })
         console.log(`[stage ${stage}] ${probe.id} run ${i}/${cfg.n} ...`)
         const exec = stage === 1 ? stage1 : stage === 2 ? stage2 : stage === 3 ? stage3 : stage4
-        const row = await exec(probe, cfg.model, cfg.agent, dir)
+        const row = await exec(probe, cfg.model, cfg.agent, dir, i)
         row.run = i
         rows.push(row)
         const mark = ok(row) ? "ok" : "EXPECTATION MISS"

@@ -55,6 +55,10 @@ Exit code 0 only if every row met its `expect` column (`any` never fails).
 
 ## Known limits
 
+- Every run appends ` [rep N]` to the probe text. This is load-bearing: the
+  LiteLLM/Redis gateway caches responses per exact prompt (observed live
+  2026-08-20: four identical probes returned byte-identical replies), so
+  unmarked replication runs measure the cache, not the model.
 - Stage 3 scores string presence in the final answer (deliberately simple);
   disk presence is reported in the note column as secondary evidence.
 - `score_response` length bands follow the Python implementation (which scores
