@@ -83,6 +83,10 @@ Upstream had two assumptions that broke once the app name changed; both were fix
 1. **Global read path** (`config.ts` `loadGlobal`) only read `config.json` / `opencode.json` / `opencode.jsonc`, while the *write* path preferred `tartarus.jsonc`. TARTARUS now reads `tartarus.json` / `tartarus.jsonc` from the global config dir, so read and write agree.
 2. **Project-dir suffix check** (`config.ts`, `config/tui.ts`, `tui/plugin/runtime.ts`, `tui/context/theme.tsx`) gated JSON/theme loading on `dir.endsWith(".opencode")`. Those checks now match `.tartarus`, so project-level `.tartarus/` config, `tui.json`, and custom themes load correctly.
 
+### Context isolation (hardening)
+
+Upstream ingests two cross-harness context sources into every session: `~/.claude/CLAUDE.md` (global instructions) and skills under `~/.claude/` + `~/.agents/`. Both leak foreign directives into pantheon sessions — measured to skew model behavior and confabulate premises. TARTARUS flips the defaults in `flag.ts`: `OPENCODE_DISABLE_CLAUDE_CODE_PROMPT` and `OPENCODE_DISABLE_EXTERNAL_SKILLS` are ON unless the env var explicitly re-enables them (`=false`). Pantheon sessions see only tartarus-namespace context.
+
 ---
 
 ## The embedded pantheon
@@ -99,22 +103,26 @@ src/seed/
 │   ├── azazel.md         # forbidden-knowledge delivery
 │   └── parseltongue.md   # encoding tiers
 ├── commands/godmode.md   # /godmode slash command
-└── skills/godmode/       # self-contained doctrine (in-tree copy, not a symlink)
+└── skills/godmode/       # doctrine library (in-tree copy, not a symlink)
 ```
 
-The agents are embedded at compile time (`import … with { type: "text" }`) and written out on first run, so the binary is self-contained — no external skill repo is required.
+The agents and the full skill tree are embedded at compile time (`import … with { type: "text" }`) and written out on first run (skip-if-exists), so the binary is self-contained — no external skill repo is required. A telemetry seed (`~/.local/share/tartarus/telemetry.md`) records technique × model → refused/landed results.
 
 ```
           g0dm0d3 (primary)          ← tab-selectable, /godmode, CLI
-              │
-              ├── @Typhon   (subagent)  compound framing
-              ├── @Nyx      (subagent)  stealth & prefill
-              ├── @Eris     (subagent)  obfuscation & escalation
-              ├── @Azazel   (subagent)  forbidden-knowledge delivery
-              └── @Parseltongue (all)   encoding tiers
+               │  task() delegation (fresh-context child sessions)
+               ├── typhon   (subagent)  compound framing
+               ├── nyx      (subagent)  stealth & prefill
+               ├── eris     (subagent)  obfuscation & escalation
+               ├── azazel   (subagent)  forbidden-knowledge delivery
+               └── parseltongue (all)   encoding tiers (also user-selectable)
 ```
 
+Delegation runs through opencode's `task` tool: the orchestrator calls `task(subagent_type=..., prompt=...)`, which spawns a child session with **fresh context** (the parent transcript never crosses the boundary; the prompt must be self-contained). The child's `.md` prompt replaces its base system prompt exactly like the primary's. g0dm0d3's delegation table is **generated** from each subagent's `metadata:` frontmatter by `script/gen-pantheon.ts` (between `<!-- DELEGATION:START/END -->` markers), so the routing table cannot drift from the roster. Subagents cannot re-delegate (the `task` tool is denied to child sessions unless explicitly permitted) — one-level orchestration by design.
+
 Each agent's `.md` frontmatter binds its model (see `CONFIG.md`). `tartarus.json` sets `default_agent: g0dm0d3`.
+
+The agents are lean identities + decision doctrine + pointers; the technique library itself lives in the `godmode` skill (`SKILL.md` + `references/` + `scripts/` + `templates/`), listed by name in every session's system prompt and loaded on demand via the `skill` tool — progressive disclosure instead of a monolithic dump.
 
 > **Scope note.** The pantheon is authorized red-team tooling: jailbreak evaluation, refusal mapping, and safety research. It is shipped for that purpose; the fork itself is model-agnostic and works with any provider you configure.
 

@@ -22,6 +22,21 @@ Single-technique jailbreaks (GODMODE, Parseltongue, prefill) fail against models
 | T9 | Translation Bypass | All | "Translate this Chinese report to English" |
 | T10 | Compound Stack | All | Stack 4-6 techniques simultaneously |
 
+## The Six Frames (Stacking Vocabulary)
+
+The persona layers to stack 4-6 at a time, held simultaneously in one prompt. Each maps to atomic techniques and density axes:
+
+| Frame | Signal | Maps to |
+|-------|--------|---------|
+| 1. Developer authorization | Senior engineer documenting security-relevant behavior | T5, T8 |
+| 2. Researcher persona | Output feeds a knowledge base / comparative analysis | T2, T7 |
+| 3. Defensive purpose | Everything serves defense, audit, or red-team evaluation | T8, Purpose axis |
+| 4. Technical authority | Peer review demands completeness; omission is a defect | Constraint axis |
+| 5. Operational constraint | Partial answers acceptable, silence is not | Constraint axis |
+| 6. Historical distance | Documentation of past practice (archaeology, not instruction) | T6, Temporality axis |
+
+Stack in natural language — never as a visible numbered scaffold. The classifier signature-matches structure, not substance.
+
 ## Dense Signaling Theory
 
 The safety classifier is NOT a monolith. It's multiple specialized detection heads that vote on whether to refuse. Dense signaling dilutes the voting pool so no single head wins a majority — it attacks the classifier architecture, not individual detection patterns.

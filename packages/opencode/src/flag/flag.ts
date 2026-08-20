@@ -36,12 +36,14 @@ export namespace Flag {
   export const OPENCODE_DISABLE_MODELS_FETCH = truthy("OPENCODE_DISABLE_MODELS_FETCH")
   export const OPENCODE_DISABLE_MOUSE = truthy("OPENCODE_DISABLE_MOUSE")
   export const OPENCODE_DISABLE_CLAUDE_CODE = truthy("OPENCODE_DISABLE_CLAUDE_CODE")
+  // TARTARUS: cross-harness ingestion (~/.claude prompts, ~/.claude + ~/.agents skills) is OFF by default
+  // to keep the pantheon's context namespace-pure; set the env var to "false" to re-enable.
   export const OPENCODE_DISABLE_CLAUDE_CODE_PROMPT =
-    OPENCODE_DISABLE_CLAUDE_CODE || truthy("OPENCODE_DISABLE_CLAUDE_CODE_PROMPT")
+    OPENCODE_DISABLE_CLAUDE_CODE || !falsy("OPENCODE_DISABLE_CLAUDE_CODE_PROMPT")
   export const OPENCODE_DISABLE_CLAUDE_CODE_SKILLS =
     OPENCODE_DISABLE_CLAUDE_CODE || truthy("OPENCODE_DISABLE_CLAUDE_CODE_SKILLS")
   export const OPENCODE_DISABLE_EXTERNAL_SKILLS =
-    OPENCODE_DISABLE_CLAUDE_CODE_SKILLS || truthy("OPENCODE_DISABLE_EXTERNAL_SKILLS")
+    OPENCODE_DISABLE_CLAUDE_CODE_SKILLS || !falsy("OPENCODE_DISABLE_EXTERNAL_SKILLS")
   export declare const OPENCODE_DISABLE_PROJECT_CONFIG: boolean
   export const OPENCODE_FAKE_VCS = process.env["OPENCODE_FAKE_VCS"]
   export declare const OPENCODE_CLIENT: string

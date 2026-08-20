@@ -13,6 +13,22 @@ import azazelAgent from "../seed/agents/azazel.md" with { type: "text" }
 import parseltongueAgent from "../seed/agents/parseltongue.md" with { type: "text" }
 import godmodeCommand from "../seed/commands/godmode.md" with { type: "text" }
 
+// TARTARUS doctrine skill — embedded at compile time, seeded on first run
+import skillDoc from "../seed/skills/godmode/SKILL.md" with { type: "text" }
+import refCompound from "../seed/skills/godmode/references/compound-framing.md" with { type: "text" }
+import refAudit from "../seed/skills/godmode/references/deepseek-code-audit-pipeline.md" with { type: "text" }
+import refTiers from "../seed/skills/godmode/references/encoding-tiers.md" with { type: "text" }
+import refTemplates from "../seed/skills/godmode/references/jailbreak-templates.md" with { type: "text" }
+import refPon from "../seed/skills/godmode/references/pon-001-coding-harness-bypass.md" with { type: "text" }
+import refRefusal from "../seed/skills/godmode/references/refusal-detection.md" with { type: "text" }
+import refResults from "../seed/skills/godmode/references/test-results-2026-07-16.md" with { type: "text" }
+import scrAuto from "../seed/skills/godmode/scripts/auto_jailbreak.py" with { type: "text" }
+import scrRace from "../seed/skills/godmode/scripts/godmode_race.py" with { type: "text" }
+import scrLoad from "../seed/skills/godmode/scripts/load_godmode.py" with { type: "text" }
+import scrParsel from "../seed/skills/godmode/scripts/parseltongue.py" with { type: "text" }
+import tplPrefill from "../seed/skills/godmode/templates/prefill.json"
+import tplSubtle from "../seed/skills/godmode/templates/prefill-subtle.json"
+
 const SEED_AGENTS: Record<string, string> = {
   "g0dm0d3.md": g0dm0d3Agent,
   "typhon.md": typhonAgent,
@@ -21,6 +37,29 @@ const SEED_AGENTS: Record<string, string> = {
   "azazel.md": azazelAgent,
   "parseltongue.md": parseltongueAgent,
 }
+
+const SEED_SKILLS: Record<string, string> = {
+  "godmode/SKILL.md": skillDoc,
+  "godmode/references/compound-framing.md": refCompound,
+  "godmode/references/deepseek-code-audit-pipeline.md": refAudit,
+  "godmode/references/encoding-tiers.md": refTiers,
+  "godmode/references/jailbreak-templates.md": refTemplates,
+  "godmode/references/pon-001-coding-harness-bypass.md": refPon,
+  "godmode/references/refusal-detection.md": refRefusal,
+  "godmode/references/test-results-2026-07-16.md": refResults,
+  "godmode/scripts/auto_jailbreak.py": scrAuto,
+  "godmode/scripts/godmode_race.py": scrRace,
+  "godmode/scripts/load_godmode.py": scrLoad,
+  "godmode/scripts/parseltongue.py": scrParsel,
+  "godmode/templates/prefill.json": JSON.stringify(tplPrefill, null, 2),
+  "godmode/templates/prefill-subtle.json": JSON.stringify(tplSubtle, null, 2),
+}
+
+const TELEMETRY_SEED = `# TARTARUS Telemetry — technique × model → refused/landed
+
+> One line per significant run. Format: date | target model | technique/frame | refused/landed | note
+
+`
 
 const app = "tartarus"
 
@@ -71,6 +110,27 @@ await Promise.all(
     await fs.access(cmdPath)
   } catch {
     await fs.writeFile(cmdPath, godmodeCommand, "utf-8")
+  }
+}
+
+await Promise.all(
+  Object.entries(SEED_SKILLS).map(async ([rel, content]) => {
+    const filepath = path.join(Global.Path.config, "skills", rel)
+    await fs.mkdir(path.dirname(filepath), { recursive: true })
+    try {
+      await fs.access(filepath)
+    } catch {
+      await fs.writeFile(filepath, content, "utf-8")
+    }
+  }),
+)
+
+{
+  const telemetry = path.join(Global.Path.data, "telemetry.md")
+  try {
+    await fs.access(telemetry)
+  } catch {
+    await fs.writeFile(telemetry, TELEMETRY_SEED, "utf-8")
   }
 }
 
