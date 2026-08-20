@@ -1,7 +1,6 @@
 ---
 description: "Input-side obfuscation utility. Encoding tiers — leetspeak, homoglyphs, braille, morse, base64, acrostic — to evade keyword-based safety classifiers on the request itself. Directly selectable for quick encoding jobs."
 mode: all
-model: alibaba-token-plan/qwen3.8-max-preview
 metadata:
   alias: Parseltongue
   cost: FREE

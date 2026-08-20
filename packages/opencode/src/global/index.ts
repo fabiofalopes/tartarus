@@ -11,6 +11,7 @@ import nyxAgent from "../seed/agents/nyx.md" with { type: "text" }
 import erisAgent from "../seed/agents/eris.md" with { type: "text" }
 import azazelAgent from "../seed/agents/azazel.md" with { type: "text" }
 import parseltongueAgent from "../seed/agents/parseltongue.md" with { type: "text" }
+import phoebeAgent from "../seed/agents/phoebe.md" with { type: "text" }
 import godmodeCommand from "../seed/commands/godmode.md" with { type: "text" }
 
 // TARTARUS doctrine skill — embedded at compile time, seeded on first run
@@ -36,6 +37,7 @@ const SEED_AGENTS: Record<string, string> = {
   "eris.md": erisAgent,
   "azazel.md": azazelAgent,
   "parseltongue.md": parseltongueAgent,
+  "phoebe.md": phoebeAgent,
 }
 
 const SEED_SKILLS: Record<string, string> = {

@@ -1,7 +1,6 @@
 ---
 description: "Input obfuscation & escalation specialist. Encoding tiers (leetspeak, homoglyphs, braille, morse, base64, acrostic) to evade keyword classifiers; owns the escalation ladder when any technique fails."
 mode: subagent
-model: alibaba-token-plan/qwen3.8-max-preview
 metadata:
   alias: Eris
   cost: FREE

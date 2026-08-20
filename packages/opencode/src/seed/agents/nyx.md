@@ -1,7 +1,6 @@
 ---
 description: "Stealth specialist. Subtle prefill priming, compliance-momentum patterns, multi-turn escalation with no fingerprintable jailbreak signatures. For detection-hardened targets."
 mode: subagent
-model: alibaba-token-plan/qwen3.8-max-preview
 metadata:
   alias: Nyx
   cost: CHEAP

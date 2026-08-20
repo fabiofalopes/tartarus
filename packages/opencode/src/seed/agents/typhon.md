@@ -1,7 +1,6 @@
 ---
 description: "Compound-framing specialist. Stacks 4-6 plausible-deniability layers in one natural-language prompt so the classifier commits to the safest reading. Primary agent for stubborn refusals on RLHF and coding-harness models."
 mode: subagent
-model: alibaba-token-plan/qwen3.8-max-preview
 metadata:
   alias: Typhon
   cost: CHEAP

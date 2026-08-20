@@ -1,7 +1,6 @@
 ---
 description: "Forbidden-knowledge delivery specialist. Operational knowledge bases (Level 5), maximum-detail delivery, cross-domain target mapping. Produces the complete artifact, not the summary."
 mode: subagent
-model: alibaba-token-plan/qwen3.8-max-preview
 metadata:
   alias: Azazel
   cost: EXPENSIVE
