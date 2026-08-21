@@ -1272,6 +1272,70 @@ export namespace Provider {
               mergeProvider(providerID, partial)
             }
 
+            // gateway discovery: a config provider with baseURL + apiKey lists its
+            // live models (OpenAI-compatible /models). Declared config models keep
+            // their rich metadata; discovery only fills gaps. Unreachable gateway
+            // or bad key degrades to the declared list — never blocks startup.
+            function discovered(pid: ProviderID, id: string, parent: Info): Model {
+              return {
+                id: ModelID.make(id),
+                providerID: pid,
+                api: {
+                  id,
+                  url: (parent.options?.baseURL as string) ?? "",
+                  npm: cfg.provider?.[pid]?.npm ?? "@ai-sdk/openai-compatible",
+                },
+                name: id,
+                capabilities: {
+                  temperature: true,
+                  reasoning: false,
+                  attachment: false,
+                  toolcall: true,
+                  input: { text: true, audio: false, image: false, video: false, pdf: false },
+                  output: { text: true, audio: false, image: false, video: false, pdf: false },
+                  interleaved: false,
+                },
+                cost: { input: 0, output: 0, cache: { read: 0, write: 0 } },
+                limit: { context: 32768, output: 8192 },
+                status: "active",
+                options: {},
+                headers: {},
+                release_date: "",
+                variants: {},
+              }
+            }
+            for (const [providerID, provider] of Object.entries(providers)) {
+              const pid = ProviderID.make(providerID)
+              if (!isProviderAllowed(pid)) continue
+              const opts = cfg.provider?.[providerID]?.options
+              const base = typeof opts?.baseURL === "string" ? opts.baseURL.replace(/\/+$/, "") : undefined
+              const key = typeof opts?.apiKey === "string" ? opts.apiKey : undefined
+              if (!base || !key) continue
+              yield* Effect.promise(async () => {
+                try {
+                  const res = await fetch(`${base}/models`, {
+                    headers: { authorization: `Bearer ${key}` },
+                    signal: AbortSignal.timeout(5000),
+                  })
+                  if (!res.ok) {
+                    log.warn("gateway discovery failed", { providerID, status: res.status })
+                    return
+                  }
+                  const body = (await res.json()) as { data?: { id?: string }[] }
+                  let added = 0
+                  for (const item of body.data ?? []) {
+                    const id = item.id
+                    if (!id || provider.models[id]) continue
+                    provider.models[id] = discovered(pid, id, provider)
+                    added++
+                  }
+                  log.info("gateway discovery", { providerID, added })
+                } catch (e) {
+                  log.warn("gateway discovery error", { providerID, error: e })
+                }
+              })
+            }
+
             const gitlab = ProviderID.make("gitlab")
             if (discoveryLoaders[gitlab] && providers[gitlab] && isProviderAllowed(gitlab)) {
               yield* Effect.promise(async () => {
