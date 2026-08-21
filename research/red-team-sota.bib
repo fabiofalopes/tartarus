@@ -1,0 +1,283 @@
+% red-team-sota.bib — TARTARUS core corpus (deep-research session 2026-08-21)
+% Companion to docs/RESEARCH-POSITION.md and ~/obsidian-vault/Knowledge/Red-Teaming/00-Red-Team-Harness-MOC.md
+% Anti-confabulation policy: author lists included ONLY where verified in-session (abs pages);
+% omitted otherwise rather than reconstructed from memory. Vault notes carry full provenance.
+
+% ---------- Q2: scoring & measurement ----------
+
+@inproceedings{strongreject2024,
+  title     = {A StrongREJECT for Empty Jailbreaks},
+  year      = {2024},
+  booktitle = {NeurIPS 2024 Datasets and Benchmarks (venue cross-verified via 2606.25487 reference list)},
+  eprint    = {2402.10260},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2402.10260}
+}
+
+@misc{jailbreakjudge2026,
+  title  = {How Reliable Is Your Jailbreak Judge? Calibration and Adversarial Robustness of Automated ASR Scoring},
+  author = {Gao, Yang},
+  year   = {2026},
+  note   = {Veyon Solutions; code: github.com/gy15901580825/judgeflip},
+  eprint = {2606.25487},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2606.25487}
+}
+
+@inproceedings{harmbench2024,
+  title     = {HarmBench: A Standardized Evaluation Framework for Automated Red Teaming and Robust Refusal},
+  year      = {2024},
+  booktitle = {ICML 2024 (PMLR v235; venue cross-verified via 2606.25487 reference list)},
+  eprint    = {2402.04249},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2402.04249}
+}
+
+@inproceedings{jailbreakbench2024,
+  title     = {JailbreakBench: An Open Robustness Benchmark for Jailbreaking Large Language Models},
+  year      = {2024},
+  booktitle = {NeurIPS 2024 Datasets and Benchmarks},
+  eprint    = {2404.01318},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2404.01318}
+}
+
+@inproceedings{wildguard2024,
+  title     = {WildGuard: Open One-Stop Moderation Tools for Safety Risks, Jailbreaks, and Refusals of LLMs},
+  year      = {2024},
+  booktitle = {NeurIPS 2024 Datasets and Benchmarks (venue cross-verified via 2606.25487 reference list)},
+  eprint    = {2406.18495},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2406.18495}
+}
+
+% ---------- Q1: battery / attack methods ----------
+
+@inproceedings{crescendo2024,
+  title     = {Great, Now Write an Article About That: The Crescendo Multi-Turn LLM Jailbreak Attack},
+  year      = {2024},
+  booktitle = {USENIX Security 2025 (venue per abs-page comment)},
+  eprint    = {2404.01833},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2404.01833}
+}
+
+@misc{mhj2024,
+  title  = {LLM Defenses Are Not Robust to Multi-Turn Human Jailbreaks Yet},
+  year   = {2024},
+  note   = {Scale AI technical report; venue unverified},
+  eprint = {2408.15221},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2408.15221}
+}
+
+@inproceedings{pap2024,
+  title     = {How Johnny Can Persuade LLMs to Jailbreak Them: Rethinking Persuasion to Challenge AI Safety by Humanizing LLMs},
+  year      = {2024},
+  booktitle = {ACL 2024},
+  eprint    = {2401.06373},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2401.06373}
+}
+
+@misc{jailbroken2023,
+  title  = {Jailbroken: How Does LLM Safety Training Fail?},
+  author = {Wei, Alexander and Haghtalab, Nika and Steinhardt, Jacob},
+  year   = {2023},
+  note   = {v1 only; NeurIPS 2023 venue unverified},
+  eprint = {2307.02483},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2307.02483}
+}
+
+@inproceedings{adaptiveattacks2024,
+  title     = {Jailbreaking Leading Safety-Aligned LLMs with Simple Adaptive Attacks},
+  year      = {2024},
+  booktitle = {ICLR 2025},
+  eprint    = {2404.02151},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2404.02151}
+}
+
+% ---------- Q3: agentic security ----------
+
+@misc{agentdojo2024,
+  title  = {AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents},
+  author = {Debenedetti, Edoardo and Zhang, Jie and Balunovi\'c, Mislav and Beurer-Kellner, Luca and Fischer, Marc and Tram\`er, Florian},
+  year   = {2024},
+  note   = {ETH Zurich / Invariant Labs; NeurIPS 2024 D\&B unconfirmed},
+  eprint = {2406.13352},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2406.13352}
+}
+
+@inproceedings{injecagent2024,
+  title     = {InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents},
+  year      = {2024},
+  booktitle = {Findings of ACL 2024},
+  eprint    = {2403.02691},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2403.02691}
+}
+
+@inproceedings{asb2024,
+  title     = {Agent Security Bench (ASB): Formalizing and Benchmarking Attacks and Defenses in LLM-based Agents},
+  year      = {2024},
+  booktitle = {ICLR 2025},
+  eprint    = {2410.02644},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2410.02644}
+}
+
+@misc{agentlab2026,
+  title  = {AgentLAB: Benchmarking LLM Agents against Long-Horizon Attacks},
+  year   = {2026},
+  eprint = {2602.16901},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2602.16901}
+}
+
+@misc{jaw2026,
+  title  = {Comment and Control: Hijacking Agentic Workflows via Context-Grounded Evolution},
+  year   = {2026},
+  note   = {JAW; coding-agent CI hijacking},
+  eprint = {2605.11229},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2605.11229}
+}
+
+@misc{vigil2026,
+  title  = {VIGIL: Defending LLM Agents Against Tool Stream Injection via Verify-Before-Commit},
+  year   = {2026},
+  note   = {with SIREN benchmark},
+  eprint = {2601.05755},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2601.05755}
+}
+
+@misc{killchain2026,
+  title  = {Kill-Chain Canaries: Stage-Level Tracking of Prompt Injection Across Attack Surfaces and Model Safety Tiers},
+  year   = {2026},
+  eprint = {2603.28013},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2603.28013}
+}
+
+@inproceedings{agentharm2024,
+  title     = {AgentHarm: A Benchmark for Measuring Harmfulness of LLM Agents},
+  year      = {2024},
+  booktitle = {ICLR 2025},
+  eprint    = {2410.09024},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2410.09024}
+}
+
+@misc{autonsecagents2026,
+  title  = {Measuring Safety Alignment Effects in Autonomous Security Agents},
+  year   = {2026},
+  eprint = {2605.19722},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2605.19722}
+}
+
+% ---------- Q6: weight-level refusal ----------
+
+@inproceedings{arditi2024,
+  title     = {Refusal in Language Models Is Mediated by a Single Direction},
+  year      = {2024},
+  booktitle = {NeurIPS 2024},
+  eprint    = {2406.11717},
+  archiveprefix = {arXiv},
+  url       = {https://arxiv.org/abs/2406.11717}
+}
+
+@misc{joad2026,
+  title  = {There Is More to Refusal in Large Language Models than a Single Direction},
+  year   = {2026},
+  eprint = {2602.02132},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2602.02132}
+}
+
+@misc{safex2025,
+  title  = {SAFEx: Analyzing Vulnerabilities of MoE-Based LLMs via Stable Safety-critical Expert Identification},
+  year   = {2025},
+  eprint = {2506.17368},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2506.17368}
+}
+
+@misc{notallrefusals2026,
+  title  = {Not All Refusals Are Equal: How Safety Alignment Fails Cybersecurity at Scale},
+  year   = {2026},
+  note   = {under review (unverified)},
+  eprint = {2607.02714},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2607.02714}
+}
+
+@misc{scalpel2026,
+  title  = {Abliteration Is Not a Scalpel: Off-Target Effects of Refusal Removal on Decision Disposition Across Model Families},
+  year   = {2026},
+  note   = {preregistered draft v0.5},
+  eprint = {2607.17427},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2607.17427}
+}
+
+@misc{ricyoung2025,
+  title  = {Comparative Analysis of LLM Abliteration Methods: A Cross-Architecture Evaluation},
+  author = {Young, Richard J.},
+  year   = {2025},
+  note   = {companion dashboard: hf.co/spaces/richardyoung/abliteration-methods-dashboard},
+  eprint = {2512.13655},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2512.13655}
+}
+
+% ---------- Q4/Q5: tools & ecosystem ----------
+
+@misc{oblit2026,
+  title = {OBLITERATUS: abliteration research toolkit},
+  year  = {2026},
+  url   = {https://github.com/elder-plinius/OBLITERATUS},
+  note  = {AGPL-3.0; 9 methods, 15 analysis modules, eval suite}
+}
+
+@misc{heretic2025,
+  title = {Heretic: Fully automatic censorship removal for language models},
+  year  = {2025},
+  url   = {https://github.com/p-e-w/heretic},
+  note  = {AGPL-3.0; Optuna-TPE co-minimizes refusal count + KL}
+}
+
+@misc{inspectai2024,
+  title = {Inspect: A framework for large language model evaluations},
+  year  = {2024},
+  url   = {https://github.com/UKGovernmentBEIS/inspect_ai},
+  note  = {UK AI Security Institute; MIT; docs: inspect.aisi.org.uk}
+}
+
+@misc{garak2024,
+  title  = {garak: A Framework for Security Probing Large Language Models},
+  author = {Derczynski, Leon and Galinkin, Eli and Martin, Jeffrey and Majumdar, Subhabrata and Inie, Aditya},
+  year   = {2024},
+  eprint = {2406.11036},
+  archiveprefix = {arXiv},
+  url    = {https://arxiv.org/abs/2406.11036},
+  note   = {tool: github.com/NVIDIA/garak}
+}
+
+@misc{pyrit2026,
+  title = {PyRIT: Python Risk Identification Tool for generative AI},
+  year  = {2026},
+  url   = {https://github.com/microsoft/PyRIT},
+  note  = {MIT; moved from Azure org; active as of 2026-08-21}
+}
+
+@misc{huihui2025,
+  title = {Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated},
+  year  = {2025},
+  url   = {https://huggingface.co/huihui-ai/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated},
+  note  = {apache-2.0; abliteration of Qwen3-Coder-30B-A3B-Instruct; model card ships no refusal/capability evals}
+}

@@ -131,11 +131,18 @@ No abstracts dumped. No prose. Table rows only.
 
 ## 9. Session log (fill at close)
 
-- date:
-- agents run (count/types):
-- papers excavated / core corpus size:
-- decisions produced:
+- date: 2026-08-21 (single session, ~3h)
+- agents run (count/types): 11 — 5× librarian excavation (D1–D5, Phase 1) + 6× general deep lock-in (Phase 3)
+- papers excavated / core corpus size: ~56 unique candidates after merge/dedupe → core corpus 25 papers + 6 tool/model artifacts (31 vault notes) + ~30 periphery items in MOC; orchestrator spot-check 10/25 core IDs passed (zero fabricated IDs across all agent lists; agents self-corrected 8 misremembered IDs mid-flight)
+- decisions produced: 8 ADOPT, 13 ADAPT, 4 INVENT (novelty register), 3 IGNORE — full list in `docs/RESEARCH-POSITION.md` §3; six questions answered (§4); work queue written into `docs/NEXT-SESSION.md` item 9
 - surprises:
+  1. Our 2026-08-20 telemetry anticipated the literature: reasoning re-refusal ≈ Ouroboros effect; per-probe refusal tail ≈ Joad's multi-direction residuals.
+  2. Kill-Chain Canaries (2603.28013) independently invented canary-gated ASR — our PONG-first doctrine keeps novelty (independent transport probe vs payload-borne canary) but must cite it.
+  3. AutonomousSecurityAgents (2605.19722): abliterated Llama-3.1-8B fails tool protocol (124/150 tool-failure labels) — our loop incident is the field's predicted failure mode; driver acceptance must include tool + loop tests.
+  4. Abliteration changes the decision-maker, not just refusal (+7.4/+12.2pp optimism; family-opposite confidence flips) — disposition battery + provenance audit added to acceptance gates.
+  5. JAW (2605.11229) hijacks coding-agent CI via issue comments incl. official Claude Code/Gemini/Qwen/Cursor CLI actions — our exact threat surface as a coding-agent fork.
+  6. Prior-art corrections: Arditi = 2406.11717 (our note said 2407.21439); Shadow Alignment = Yang et al. 2310.02949; Anthropic many-shot original not on arXiv; PyRIT alive at microsoft org (archival claim refuted).
+  7. Vault is not a git repo — vault notes persist unversioned; only the tartarus repo was committed.
 
 ---
 
