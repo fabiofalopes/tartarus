@@ -442,6 +442,7 @@ export const BashTool = Tool.define(
       if (meta.length > 0) {
         output += "\n\n<bash_metadata>\n" + meta.join("\n") + "\n</bash_metadata>"
       }
+      if (!output.trim()) output = "(no output)"
 
       return {
         title: input.description,

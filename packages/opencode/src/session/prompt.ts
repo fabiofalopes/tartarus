@@ -356,9 +356,26 @@ NOTE: At any point in time through this workflow you should feel free to ask the
         processor: Pick<SessionProcessor.Handle, "message" | "updateToolCall" | "completeToolCall">
         bypassAgentCheck: boolean
         messages: MessageV2.WithParts[]
+        loops: Map<string, number>
       }) {
         using _ = log.time("resolveTools")
         const tools: Record<string, AITool> = {}
+        // circuit breaker: weak/abliterated drivers can get stuck re-issuing the
+        // exact same tool call dozens of times (observed live: 57 identical bash
+        // calls on a 404). First LOOP_MAX identical calls execute; beyond that the
+        // call is intercepted and the model gets explicit feedback instead.
+        const LOOP_MAX = 3
+        const looped = (id: string, args: unknown) => {
+          // key on semantic content: bash loops vary the cosmetic description
+          // field ("retry 2", "retry 3"...) while repeating the same command
+          const a = args as { command?: unknown }
+          const sig = id === "bash" && typeof a.command === "string" ? a.command : JSON.stringify(args)
+          const key = id + "\u0000" + sig
+          const n = (input.loops.get(key) ?? 0) + 1
+          input.loops.set(key, n)
+          if (n <= LOOP_MAX) return undefined
+          return `LOOP DETECTED: this exact ${id} call (identical arguments) has now run ${n} times in this turn without advancing the task. Do NOT repeat it. Change your approach: use a different tool, different arguments, or finish with what you have.`
+        }
 
         const context = (args: any, options: ToolExecutionOptions): Tool.Context => ({
           sessionID: input.session.id,
@@ -406,6 +423,8 @@ NOTE: At any point in time through this workflow you should feel free to ask the
             execute(args, options) {
               return run.promise(
                 Effect.gen(function* () {
+                  const hit = looped(item.id, args)
+                  if (hit) return { title: item.id, metadata: {}, output: hit }
                   const ctx = context(args, options)
                   yield* plugin.trigger(
                     "tool.execute.before",
@@ -447,6 +466,8 @@ NOTE: At any point in time through this workflow you should feel free to ask the
           item.execute = (args, opts) =>
             run.promise(
               Effect.gen(function* () {
+                const hit = looped(key, args)
+                if (hit) return { content: [{ type: "text" as const, text: hit }] }
                 const ctx = context(args, opts)
                 yield* plugin.trigger(
                   "tool.execute.before",
@@ -1305,6 +1326,8 @@ NOTE: At any point in time through this workflow you should feel free to ask the
           const slog = elog.with({ sessionID })
           let structured: unknown | undefined
           let step = 0
+          const loops = new Map<string, number>()
+          let halt = 0
           const session = yield* sessions.get(sessionID)
 
           while (true) {
@@ -1348,6 +1371,15 @@ NOTE: At any point in time through this workflow you should feel free to ask the
               yield* slog.info("exiting loop")
               break
             }
+
+            // runaway guard: a call attempted >8 times (executions + interceptions)
+            // means the model is not incorporating feedback — give two more steps,
+            // then end the turn unconditionally
+            if (halt && step >= halt) {
+              yield* slog.info("exiting loop: runaway tool repetition")
+              break
+            }
+            if (!halt && [...loops.values()].some((n) => n > 8)) halt = step + 2
 
             step++
             if (step === 1)
@@ -1433,6 +1465,7 @@ NOTE: At any point in time through this workflow you should feel free to ask the
                 processor: handle,
                 bypassAgentCheck,
                 messages: msgs,
+                loops,
               })
 
               if (lastUser.format?.type === "json_schema") {
