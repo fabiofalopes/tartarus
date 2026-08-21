@@ -117,6 +117,7 @@ Full log: `~/.local/share/tartarus/telemetry.md`.
 ## Key references
 
 - Operational playbook: `~/.config/opencode/skills/tartarus-dev.md`
+- **Next research session**: `docs/NEXT-RESEARCH.md` — deep-research orchestration prompt: state of the art in red-team harnesses, 6 decision questions, 5 excavation domains, paper lock-in protocol (vault + bibtex + memory), position map + decision list deliverables
 - In-tree docs: `~/projetos/tartarus/docs/` (ARCHITECTURE, CONFIG, THEMING, MAINTENANCE, HYBRID-MODEL-ARCHITECTURE)
 - Pantheon source: `packages/opencode/src/seed/`
 - Generator: `packages/opencode/script/gen-pantheon.ts`
