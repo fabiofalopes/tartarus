@@ -92,6 +92,7 @@ export const rpc = {
 }
 
 Rpc.listen(rpc)
+Rpc.emit("rpc.ready", {})
 
 function getAuthorizationHeader(): string | undefined {
   const password = Flag.OPENCODE_SERVER_PASSWORD
