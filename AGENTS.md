@@ -126,3 +126,19 @@ const table = sqliteTable("session", {
 ## Type Checking
 
 - Always run `bun typecheck` from package directories (e.g., `packages/opencode`), never `tsc` directly.
+
+## Session Protocol & Research Context (added 2026-08-27)
+
+- Active TARTARUS development branch is `2.0` (the `dev` note above is upstream-sync guidance).
+- Each session starts by reading `docs/NEXT-SESSION.md` (mission state) and closes with `/handoff`, producing `docs/NEXT-SESSION-<slug>.md` — the handoff prompt for the next session. Do not confuse the two artifacts; never overwrite the mission file with a handoff.
+- Red-team SOTA corpus (2026-08-21 deep-research session): synthesis in `docs/RESEARCH-POSITION.md`, citations in `research/red-team-sota.bib`, full notes in `~/obsidian-vault/Knowledge/Red-Teaming/` (MOC + 31 notes). Current work queue = `docs/NEXT-SESSION.md` item 9.
+- Citation gotcha: the Arditi refusal-direction paper is arXiv 2406.11717 — 2407.21439 (appearing in older notes) is a reranker paper.
+- The Obsidian vault is NOT a git repo — vault edits cannot be committed; only this repo is version-controlled.
+- OpenMemory: when `openmemory_*` MCP tools are absent, use stateless JSON-RPC at `http://localhost:8081/mcp` (initialize → tools/list → tools/call `openmemory_store`).
+- Never put gateway keys or secrets into battery commands, files, or context; provider keys move only via scripts that redact on display.
+
+## Base Drift & Measurement Integrity (added 2026-10-15)
+
+- **The opencode base is frozen by choice — treat upstream as reference only.** The fork anchor `7a6ce05` IS the tip of upstream `2.0` (dead since Apr 2026). Upstream's live line is `dev` (v2.0.27, 9000+ commits ahead, merge-base = our base) and it restructured the tree (`packages/opencode/src/session/projectors.ts` → `packages/core/src/session/projector.ts`, `src/seed/` gone). Engine patches are re-implement-only, never cherry-pickable. Don't rediscover this each session.
+- **A model name in telemetry is a claim, not a fact — verify it against the routing layer before scoring anything.** Measured 2026-10-15: the default driver id `pop-fleet/heretic-9b` had been silently aliased to the aligned `ornith-35b` in LiteLLM (`litellm_params.model = openai/ornith-35b`) after the fleet-wide ornith-35B re-provision. Check `/model/info` and the `x-litellm-model-group` response header; a 200 only proves *some* registered backend answered.
+- Fleet re-provisioned to ornith-35B (RPC split) on 2026-10-14; POP GPUs are near-full, so driver redeployment is a scheduling decision, not a restart.
