@@ -207,6 +207,16 @@ export const TuiThreadCommand = cmd({
         client.call("checkUpgrade", { directory: cwd }).catch(() => {})
       }, 1000).unref?.()
 
+      await withTimeout(
+        new Promise<void>((resolve) => {
+          const off = client.on("rpc.ready", () => {
+            off()
+            resolve()
+          })
+        }),
+        30000,
+      )
+
       try {
         await tui({
           url: transport.url,
