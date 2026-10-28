@@ -26,6 +26,7 @@ import osakaJade from "./theme/osaka-jade.json" with { type: "json" }
 import onedark from "./theme/one-dark.json" with { type: "json" }
 import opencode from "./theme/opencode.json" with { type: "json" }
 import tartarus from "./theme/tartarus.json" with { type: "json" }
+import parseltongue from "./theme/parseltongue.json" with { type: "json" }
 import orng from "./theme/orng.json" with { type: "json" }
 import lucentOrng from "./theme/lucent-orng.json" with { type: "json" }
 import palenight from "./theme/palenight.json" with { type: "json" }
@@ -110,6 +111,7 @@ export const DEFAULT_THEMES: Record<string, ThemeJson> = {
   ["osaka-jade"]: osakaJade,
   opencode,
   tartarus,
+  parseltongue,
   orng,
   ["lucent-orng"]: lucentOrng,
   palenight,
