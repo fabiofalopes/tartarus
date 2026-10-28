@@ -16,7 +16,7 @@ describe("session.system", () => {
           ["alpha-skill", "Alpha skill."],
           ["middle-skill", "Middle skill."],
         ]) {
-          const skillDir = path.join(dir, ".opencode", "skill", name)
+          const skillDir = path.join(dir, ".tartarus", "skill", name)
           await Bun.write(
             path.join(skillDir, "SKILL.md"),
             `---

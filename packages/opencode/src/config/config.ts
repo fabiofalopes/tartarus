@@ -1509,7 +1509,7 @@ export namespace Config {
           }
 
           if (existsSync(managedDir)) {
-            for (const file of ["opencode.json", "opencode.jsonc"]) {
+            for (const file of ["tartarus.json", "tartarus.jsonc"]) {
               const source = path.join(managedDir, file)
               yield* merge(source, yield* loadFile(source), "global")
             }

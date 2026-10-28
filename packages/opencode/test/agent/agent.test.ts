@@ -48,7 +48,7 @@ test("build agent has correct default properties", async () => {
   })
 })
 
-test("plan agent denies edits except .opencode/plans/*", async () => {
+test("plan agent denies edits except .tartarus/plans/*", async () => {
   await using tmp = await tmpdir()
   await Instance.provide({
     directory: tmp.path,
@@ -58,7 +58,7 @@ test("plan agent denies edits except .opencode/plans/*", async () => {
       // Wildcard is denied
       expect(evalPerm(plan, "edit")).toBe("deny")
       // But specific path is allowed
-      expect(Permission.evaluate("edit", ".opencode/plans/foo.md", plan!.permission).action).toBe("allow")
+      expect(Permission.evaluate("edit", ".tartarus/plans/foo.md", plan!.permission).action).toBe("allow")
     },
   })
 })
@@ -560,7 +560,7 @@ test("skill directories are allowed for external_directory", async () => {
   await using tmp = await tmpdir({
     git: true,
     init: async (dir) => {
-      const skillDir = path.join(dir, ".opencode", "skill", "perm-skill")
+      const skillDir = path.join(dir, ".tartarus", "skill", "perm-skill")
       await Bun.write(
         path.join(skillDir, "SKILL.md"),
         `---
@@ -582,7 +582,7 @@ description: Permission skill.
       directory: tmp.path,
       fn: async () => {
         const build = await Agent.get("build")
-        const skillDir = path.join(tmp.path, ".opencode", "skill", "perm-skill")
+        const skillDir = path.join(tmp.path, ".tartarus", "skill", "perm-skill")
         const target = path.join(skillDir, "reference", "notes.md")
         expect(Permission.evaluate("external_directory", target, build!.permission).action).toBe("allow")
       },
@@ -704,13 +704,16 @@ test("defaultAgent throws when all primary agents are disabled", async () => {
       agent: {
         build: { disable: true },
         plan: { disable: true },
+        // TARTARUS pantheon adds g0dm0d3 (primary) and parseltongue (all) as visible primaries; disable them too
+        g0dm0d3: { disable: true },
+        parseltongue: { disable: true },
       },
     },
   })
   await Instance.provide({
     directory: tmp.path,
     fn: async () => {
-      // build and plan are disabled, no primary-capable agents remain
+      // build, plan and g0dm0d3 are disabled, no primary-capable agents remain
       await expect(Agent.defaultAgent()).rejects.toThrow("no primary visible agent found")
     },
   })

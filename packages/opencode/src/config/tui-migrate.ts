@@ -37,8 +37,8 @@ interface MigrateInput {
  * skips only locations where a tui.json already exists.
  */
 export async function migrateTuiConfig(input: MigrateInput) {
-  const opencode = await opencodeFiles(input)
-  for (const file of opencode) {
+  const sources = await tartarusFiles(input)
+  for (const file of sources) {
     const source = await Filesystem.readText(file).catch((error) => {
       log.warn("failed to read config for tui migration", { path: file, error })
       return undefined
@@ -134,16 +134,16 @@ async function backupAndStripLegacy(file: string, source: string) {
     })
 }
 
-async function opencodeFiles(input: { directories: string[]; managed: string }) {
+async function tartarusFiles(input: { directories: string[]; managed: string }) {
   const project = Flag.OPENCODE_DISABLE_PROJECT_CONFIG
     ? []
-    : await ConfigPaths.projectFiles("opencode", Instance.directory, Instance.worktree)
-  const files = [...project, ...ConfigPaths.fileInDirectory(Global.Path.config, "opencode")]
+    : await ConfigPaths.projectFiles("tartarus", Instance.directory, Instance.worktree)
+  const files = [...project, ...ConfigPaths.fileInDirectory(Global.Path.config, "tartarus")]
   for (const dir of unique(input.directories)) {
-    files.push(...ConfigPaths.fileInDirectory(dir, "opencode"))
+    files.push(...ConfigPaths.fileInDirectory(dir, "tartarus"))
   }
   if (Flag.OPENCODE_CONFIG) files.push(Flag.OPENCODE_CONFIG)
-  files.push(...ConfigPaths.fileInDirectory(input.managed, "opencode"))
+  files.push(...ConfigPaths.fileInDirectory(input.managed, "tartarus"))
 
   const existing = await Promise.all(
     unique(files).map(async (file) => {
