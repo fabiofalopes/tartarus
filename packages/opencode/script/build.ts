@@ -47,7 +47,8 @@ const migrations = await Promise.all(
 )
 console.log(`Loaded ${migrations.length} migrations`)
 
-const singleFlag = process.argv.includes("--single")
+const installFlag = process.argv.includes("--install")
+const singleFlag = process.argv.includes("--single") || installFlag
 const baselineFlag = process.argv.includes("--baseline")
 const skipInstall = process.argv.includes("--skip-install")
 const plugin = createSolidTransformPlugin()
@@ -165,6 +166,7 @@ const targets = singleFlag
 await $`rm -rf dist`
 
 const binaries: Record<string, string> = {}
+let installFrom: string | undefined
 if (!skipInstall) {
   await $`bun install --os="*" --cpu="*" @opentui/core@${pkg.dependencies["@opentui/core"]}`
   await $`bun install --os="*" --cpu="*" @parcel/watcher@${pkg.dependencies["@parcel/watcher"]}`
@@ -248,6 +250,28 @@ for (const item of targets) {
     ),
   )
   binaries[name] = Script.version
+  if (
+    installFlag &&
+    item.os === process.platform &&
+    item.arch === process.arch &&
+    item.abi === undefined &&
+    item.avx2 !== false
+  ) {
+    installFrom = path.resolve(dir, `dist/${name}/bin/tartarus`)
+  }
+}
+
+if (installFlag) {
+  if (!installFrom) {
+    console.error("--install: no native binary was built (unexpected target set)")
+    process.exit(1)
+  }
+  const dest = path.join(process.env.HOME || "", ".local", "bin", "tartarus")
+  await $`mkdir -p ${path.dirname(dest)}`
+  await $`cp ${installFrom} ${dest}`
+  await $`chmod 755 ${dest}`
+  const out = await $`${dest} --version`.text()
+  console.log(`\nInstalled ${dest}\n  ${out.trim()}`)
 }
 
 if (Script.release) {

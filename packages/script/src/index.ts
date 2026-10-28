@@ -31,9 +31,14 @@ const CHANNEL = await (async () => {
 })()
 const IS_PREVIEW = CHANNEL !== "latest"
 
+// Stamp preview builds with the source commit so a binary can be traced back to git.
+const sha = await $`git rev-parse --short HEAD`.text().then((x) => x.trim()).catch(() => "")
+const dirty = await $`git status --porcelain`.text().then((x) => x.trim().length > 0).catch(() => false)
+const stamp = sha ? `-g${sha}${dirty ? "-dirty" : ""}` : ""
+
 const VERSION = await (async () => {
   if (env.OPENCODE_VERSION) return env.OPENCODE_VERSION
-  if (IS_PREVIEW) return `0.0.0-${CHANNEL}-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "")}`
+  if (IS_PREVIEW) return `0.0.0-${CHANNEL}-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "")}${stamp}`
   const version = await fetch("https://registry.npmjs.org/opencode-ai/latest")
     .then((res) => {
       if (!res.ok) throw new Error(res.statusText)
