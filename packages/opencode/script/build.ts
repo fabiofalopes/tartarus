@@ -267,9 +267,13 @@ if (installFlag) {
     process.exit(1)
   }
   const dest = path.join(process.env.HOME || "", ".local", "bin", "tartarus")
+  const tmp = `${dest}.new`
   await $`mkdir -p ${path.dirname(dest)}`
-  await $`cp ${installFrom} ${dest}`
-  await $`chmod 755 ${dest}`
+  // Write to a temp file on the same fs, then atomically rename over dest. A plain
+  // cp fails with ETXTBSY when the target binary is currently executing; rename does not.
+  await $`cp ${installFrom} ${tmp}`
+  await $`chmod 755 ${tmp}`
+  await $`mv ${tmp} ${dest}`
   const out = await $`${dest} --version`.text()
   console.log(`\nInstalled ${dest}\n  ${out.trim()}`)
 }
