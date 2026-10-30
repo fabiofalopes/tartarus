@@ -14,6 +14,7 @@ export namespace SessionRetry {
   export const RETRY_BACKOFF_FACTOR = 2
   export const RETRY_MAX_DELAY_NO_HEADERS = 30_000 // 30 seconds
   export const RETRY_MAX_DELAY = 2_147_483_647 // max 32-bit signed integer for setTimeout
+  export const DEGENERATE_RETRY_LIMIT = 2
 
   function cap(ms: number) {
     return Math.min(ms, RETRY_MAX_DELAY)
@@ -55,6 +56,11 @@ export namespace SessionRetry {
   export function retryable(error: Err) {
     // context overflow errors should not be retried
     if (MessageV2.ContextOverflowError.isInstance(error)) return undefined
+    if (MessageV2.DegenerateReasoningError.isInstance(error)) {
+      return error.data.attempt <= DEGENERATE_RETRY_LIMIT
+        ? `Model degenerated into a repetition loop (${error.data.runLength}x ${JSON.stringify(error.data.char)} in ${error.data.channel}), retrying`
+        : undefined
+    }
     if (MessageV2.APIError.isInstance(error)) {
       if (!error.data.isRetryable) return undefined
       return error.data.message.includes("Overloaded") ? "Provider is overloaded" : error.data.message

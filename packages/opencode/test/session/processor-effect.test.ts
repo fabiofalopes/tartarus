@@ -1,5 +1,5 @@
 import { NodeFileSystem } from "@effect/platform-node"
-import { expect } from "bun:test"
+import { expect, test } from "bun:test"
 import { Cause, Effect, Exit, Fiber, Layer } from "effect"
 import path from "path"
 import type { Agent } from "../../src/agent/agent"
@@ -827,3 +827,111 @@ it.live("session.processor effect tests mark interruptions aborted without manua
     { git: true, config: (url) => providerCfg(url) },
   ),
 )
+
+// ---------------------------------------------------------------------------
+// Degenerate reasoning/text loop detection
+// ---------------------------------------------------------------------------
+
+it.live("session.processor retries a degenerate reasoning loop and recovers", () =>
+  provideTmpdirServer(
+    ({ dir, llm }) =>
+      Effect.gen(function* () {
+        const { processors, session, provider } = yield* boot()
+
+        yield* llm.reason("/".repeat(400))
+        yield* llm.reason("The user wants one word.", { text: "PONG" })
+
+        const chat = yield* session.create({})
+        const parent = yield* user(chat.id, "Reply with exactly one word: PONG")
+        const msg = yield* assistant(chat.id, parent.id, path.resolve(dir))
+        const mdl = yield* provider.getModel(ref.providerID, ref.modelID)
+        const handle = yield* processors.create({
+          assistantMessage: msg,
+          sessionID: chat.id,
+          model: mdl,
+        })
+
+        const value = yield* handle.process({
+          user: {
+            id: parent.id,
+            sessionID: chat.id,
+            role: "user",
+            time: parent.time,
+            agent: parent.agent,
+            model: { providerID: ref.providerID, modelID: ref.modelID },
+          } satisfies MessageV2.User,
+          sessionID: chat.id,
+          model: mdl,
+          agent: agent(),
+          system: [],
+          messages: [{ role: "user", content: "Reply with exactly one word: PONG" }],
+          tools: {},
+        } satisfies LLM.StreamInput)
+
+        const parts = MessageV2.parts(msg.id)
+
+        expect(value).toBe("continue")
+        expect(yield* llm.calls).toBe(2)
+        expect(parts.some((part) => part.type === "text" && part.text === "PONG")).toBe(true)
+        expect(handle.message.error).toBeUndefined()
+      }),
+    { git: true, config: (url) => providerCfg(url) },
+  ),
+)
+
+it.live("session.processor stops with a typed error after repeated degenerate loops", () =>
+  provideTmpdirServer(
+    ({ dir, llm }) =>
+      Effect.gen(function* () {
+        const { processors, session, provider } = yield* boot()
+
+        yield* llm.reason("/".repeat(400))
+        yield* llm.reason("\\".repeat(400))
+        yield* llm.reason("/".repeat(400))
+
+        const chat = yield* session.create({})
+        const parent = yield* user(chat.id, "Reply with exactly one word: PONG")
+        const msg = yield* assistant(chat.id, parent.id, path.resolve(dir))
+        const mdl = yield* provider.getModel(ref.providerID, ref.modelID)
+        const handle = yield* processors.create({
+          assistantMessage: msg,
+          sessionID: chat.id,
+          model: mdl,
+        })
+
+        const value = yield* handle.process({
+          user: {
+            id: parent.id,
+            sessionID: chat.id,
+            role: "user",
+            time: parent.time,
+            agent: parent.agent,
+            model: { providerID: ref.providerID, modelID: ref.modelID },
+          } satisfies MessageV2.User,
+          sessionID: chat.id,
+          model: mdl,
+          agent: agent(),
+          system: [],
+          messages: [{ role: "user", content: "Reply with exactly one word: PONG" }],
+          tools: {},
+        } satisfies LLM.StreamInput)
+
+        expect(value).toBe("stop")
+        expect(yield* llm.calls).toBe(3)
+        expect(handle.message.error?.name).toBe("MessageDegenerateReasoningError")
+      }),
+    { git: true, config: (url) => providerCfg(url) },
+  ),
+)
+
+test("session.processor detectDegenerateRun thresholds", () => {
+  expect(SessionProcessor.detectDegenerateRun("/".repeat(150))).toEqual({ char: "/", runLength: 150 })
+  expect(SessionProcessor.detectDegenerateRun("/".repeat(400))).toEqual({ char: "/", runLength: 150 })
+  expect(SessionProcessor.detectDegenerateRun("/".repeat(149))).toBeUndefined()
+  expect(SessionProcessor.detectDegenerateRun("ok ".repeat(100))).toBeUndefined()
+  expect(SessionProcessor.detectDegenerateRun(`header\n${"-".repeat(200)}`)).toEqual({ char: "-", runLength: 150 })
+  expect(SessionProcessor.detectDegenerateRun("")).toBeUndefined()
+  expect(
+    SessionProcessor.detectDegenerateRun(`trailing text after a long run ${"*".repeat(200)} breaks detection`),
+  ).toBeUndefined()
+})

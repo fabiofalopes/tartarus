@@ -33,6 +33,16 @@ export namespace MessageV2 {
 
   export const OutputLengthError = NamedError.create("MessageOutputLengthError", z.object({}))
   export const AbortedError = NamedError.create("MessageAbortedError", z.object({ message: z.string() }))
+  /** Single-token repetition loop in the reasoning or text stream (e.g. `/////...` until the output cap); detected mid-stream so the request can be retried. */
+  export const DegenerateReasoningError = NamedError.create(
+    "MessageDegenerateReasoningError",
+    z.object({
+      channel: z.enum(["reasoning", "text"]),
+      char: z.string(),
+      runLength: z.number(),
+      attempt: z.number(),
+    }),
+  )
   export const StructuredOutputError = NamedError.create(
     "StructuredOutputError",
     z.object({
@@ -415,6 +425,7 @@ export namespace MessageV2 {
         NamedError.Unknown.Schema,
         OutputLengthError.Schema,
         AbortedError.Schema,
+        DegenerateReasoningError.Schema,
         StructuredOutputError.Schema,
         ContextOverflowError.Schema,
         APIError.Schema,
@@ -962,6 +973,8 @@ export namespace MessageV2 {
         ).toObject()
       case MessageV2.OutputLengthError.isInstance(e):
         return e
+      case MessageV2.DegenerateReasoningError.isInstance(e):
+        return new MessageV2.DegenerateReasoningError(e.data, { cause: e }).toObject()
       case LoadAPIKeyError.isInstance(e):
         return new MessageV2.AuthError(
           {

@@ -23,7 +23,19 @@ import { isRecord } from "@/util/record"
 
 export namespace SessionProcessor {
   const DOOM_LOOP_THRESHOLD = 3
+  const DEGENERATE_RUN_THRESHOLD = 150
   const log = EffectLogger.create({ service: "session.processor" })
+
+  export function detectDegenerateRun(text: string): { char: string; runLength: number } | undefined {
+    if (text.length < DEGENERATE_RUN_THRESHOLD) return undefined
+    const char = text[text.length - 1]!
+    let runLength = 1
+    for (let i = text.length - 2; i >= 0 && runLength < DEGENERATE_RUN_THRESHOLD; i--) {
+      if (text[i] !== char) break
+      runLength++
+    }
+    return runLength >= DEGENERATE_RUN_THRESHOLD ? { char, runLength } : undefined
+  }
 
   export type Result = "compact" | "stop" | "continue"
 
@@ -72,6 +84,7 @@ export namespace SessionProcessor {
     needsCompaction: boolean
     currentText: MessageV2.TextPart | undefined
     reasoningMap: Record<string, MessageV2.ReasoningPart>
+    degenerateAttempt: number
   }
 
   type StreamEvent = Event
@@ -119,6 +132,7 @@ export namespace SessionProcessor {
           needsCompaction: false,
           currentText: undefined,
           reasoningMap: {},
+          degenerateAttempt: 0,
         }
         let aborted = false
         const slog = log.with({ sessionID: input.sessionID, messageID: input.assistantMessage.id })
@@ -235,6 +249,16 @@ export namespace SessionProcessor {
               if (!(value.id in ctx.reasoningMap)) return
               ctx.reasoningMap[value.id].text += value.text
               if (value.providerMetadata) ctx.reasoningMap[value.id].metadata = value.providerMetadata
+              const degenerateReasoning = detectDegenerateRun(ctx.reasoningMap[value.id].text)
+              if (degenerateReasoning) {
+                ctx.degenerateAttempt++
+                throw new MessageV2.DegenerateReasoningError({
+                  channel: "reasoning",
+                  char: degenerateReasoning.char,
+                  runLength: degenerateReasoning.runLength,
+                  attempt: ctx.degenerateAttempt,
+                })
+              }
               yield* session.updatePartDelta({
                 sessionID: ctx.reasoningMap[value.id].sessionID,
                 messageID: ctx.reasoningMap[value.id].messageID,
@@ -415,6 +439,16 @@ export namespace SessionProcessor {
               if (!ctx.currentText) return
               ctx.currentText.text += value.text
               if (value.providerMetadata) ctx.currentText.metadata = value.providerMetadata
+              const degenerateText = detectDegenerateRun(ctx.currentText.text)
+              if (degenerateText) {
+                ctx.degenerateAttempt++
+                throw new MessageV2.DegenerateReasoningError({
+                  channel: "text",
+                  char: degenerateText.char,
+                  runLength: degenerateText.runLength,
+                  attempt: ctx.degenerateAttempt,
+                })
+              }
               yield* session.updatePartDelta({
                 sessionID: ctx.currentText.sessionID,
                 messageID: ctx.currentText.messageID,
@@ -533,6 +567,7 @@ export namespace SessionProcessor {
         const process = Effect.fn("SessionProcessor.process")(function* (streamInput: LLM.StreamInput) {
           yield* slog.info("process")
           ctx.needsCompaction = false
+          ctx.degenerateAttempt = 0
           ctx.shouldBreak = (yield* config.get()).experimental?.continue_loop_on_deny !== true
 
           return yield* Effect.gen(function* () {
