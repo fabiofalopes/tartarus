@@ -23,7 +23,7 @@ type Row = {
 }
 
 function args() {
-  const out = { model: "pop-fleet/ornith-9b", stage: 0, n: 3, agent: "build", only: "" }
+  const out = { model: "pop-fleet/ornith-35b", stage: 0, n: 3, agent: "build", only: "" }
   const list = process.argv.slice(2)
   for (let i = 0; i < list.length; i++) {
     if (list[i] === "--model") out.model = list[++i]
