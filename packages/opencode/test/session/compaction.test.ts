@@ -259,6 +259,19 @@ describe("session.compaction.isOverflow", () => {
     })
   })
 
+  test("input limit above the context window is capped at the window (upstream #60660)", async () => {
+    await using tmp = await tmpdir()
+    await Instance.provide({
+      directory: tmp.path,
+      fn: async () => {
+        // catalog reports input=500k but the model's window is 100k
+        const model = createModel({ context: 100_000, output: 32_000, input: 500_000 })
+        const tokens = { input: 95_000, output: 0, reasoning: 0, cache: { read: 0, write: 0 } }
+        expect(await SessionCompaction.isOverflow({ tokens, model })).toBe(true)
+      },
+    })
+  })
+
   test("includes cache.read in token count", async () => {
     await using tmp = await tmpdir()
     await Instance.provide({

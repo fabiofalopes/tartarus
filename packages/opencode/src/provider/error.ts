@@ -18,6 +18,7 @@ export namespace ProviderError {
     /exceeds the available context size/i, // llama.cpp server
     /greater than the context length/i, // LM Studio
     /context window exceeds limit/i, // MiniMax
+    /context window exceeded/i, // LiteLLM ContextWindowExceededError
     /exceeded model token limit/i, // Kimi For Coding, Moonshot
     /context[_ ]length[_ ]exceeded/i, // Generic fallback
     /request entity too large/i, // HTTP 413
@@ -173,7 +174,26 @@ export namespace ProviderError {
   export function parseAPICallError(input: { providerID: ProviderID; error: APICallError }): ParsedAPICallError {
     const m = message(input.providerID, input.error)
     const body = json(input.error.responseBody)
-    if (isOverflow(m) || input.error.statusCode === 413 || body?.error?.code === "context_length_exceeded") {
+    // opencode gateway free-tier exhaustion: never retryable, friendly message.
+    // Body: {"type":"error","error":{"type":"FreeUsageLimitError","message":"..."}}
+    if (body?.error?.type === "FreeUsageLimitError") {
+      return {
+        type: "api_error",
+        message:
+          typeof body.error.message === "string" && body.error.message !== ""
+            ? body.error.message
+            : "Free usage limit reached. Subscribe to OpenCode Go to keep going: https://opencode.ai/go",
+        statusCode: input.error.statusCode,
+        isRetryable: false,
+        responseHeaders: input.error.responseHeaders,
+        responseBody: input.error.responseBody,
+      }
+    }
+    // 429 bodies are throttles even when their wording matches an overflow phrase
+    // (e.g. Cerebras "too many tokens processed", or a gateway quota message).
+    // Text matching stays on for 4xx and mid-stream errors without a status.
+    // (upstream #59649)
+    if (input.error.statusCode !== 429 && (isOverflow(m) || input.error.statusCode === 413 || body?.error?.code === "context_length_exceeded")) {
       return {
         type: "context_overflow",
         message: m,

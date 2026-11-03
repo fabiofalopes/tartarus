@@ -219,7 +219,6 @@ When constructing the summary, try to stick to this template:
         const prompt = compacting.prompt ?? [defaultPrompt, ...compacting.context].join("\n\n")
         const msgs = structuredClone(messages)
         yield* plugin.trigger("experimental.chat.messages.transform", {}, { messages: msgs })
-        const modelMessages = yield* MessageV2.toModelMessagesEffect(msgs, model, { stripMedia: true })
         const ctx = yield* InstanceState.context
         const msg: MessageV2.Assistant = {
           id: MessageID.ascending(),
@@ -248,36 +247,69 @@ When constructing the summary, try to stick to this template:
           },
         }
         yield* session.updateMessage(msg)
-        const processor = yield* processors.create({
-          assistantMessage: msg,
-          sessionID: input.sessionID,
-          model,
-        })
-        const result = yield* processor.process({
-          user: userMessage,
-          agent,
-          sessionID: input.sessionID,
-          tools: {},
-          system: [],
-          messages: [
-            ...modelMessages,
-            {
-              role: "user",
-              content: [{ type: "text", text: prompt }],
-            },
-          ],
-          model,
-        })
 
-        if (result === "compact") {
-          processor.message.error = new MessageV2.ContextOverflowError({
-            message: replay
-              ? "Conversation history too large to compact - exceeds model context limit"
-              : "Session too large to compact - context exceeds model limit even after stripping media",
-          }).toObject()
-          processor.message.finish = "error"
-          yield* session.updateMessage(processor.message)
-          return "stop"
+        // Shortens the oldest tool outputs in the (in-memory) transcript so a summary
+        // request that overflows retries against a smaller input instead of dropping
+        // the whole history. (upstream #58015)
+        const shortenOldest = () => {
+          let recent = 0
+          let cleared = false
+          for (let msgIndex = msgs.length - 1; msgIndex >= 0; msgIndex--) {
+            const parts = msgs[msgIndex].parts
+            for (let partIndex = parts.length - 1; partIndex >= 0; partIndex--) {
+              const part = parts[partIndex]
+              if (part.type !== "tool") continue
+              if (part.state.status !== "completed") continue
+              if (part.state.time.compacted) continue
+              if (PRUNE_PROTECTED_TOOLS.includes(part.tool)) continue
+              if (recent < PRUNE_PROTECT) {
+                recent += Token.estimate(part.state.output)
+                continue
+              }
+              part.state.time.compacted = Date.now()
+              cleared = true
+            }
+          }
+          return cleared
+        }
+
+        let result: SessionProcessor.Result
+        for (let attempt = 0; ; attempt++) {
+          const modelMessages = yield* MessageV2.toModelMessagesEffect(msgs, model, { stripMedia: true })
+          const processor = yield* processors.create({
+            assistantMessage: msg,
+            sessionID: input.sessionID,
+            model,
+          })
+          result = yield* processor.process({
+            user: userMessage,
+            agent,
+            sessionID: input.sessionID,
+            tools: {},
+            system: [],
+            messages: [
+              ...modelMessages,
+              {
+                role: "user",
+                content: [{ type: "text", text: prompt }],
+              },
+            ],
+            model,
+          })
+          if (result !== "compact") break
+          if (attempt >= 1 || !shortenOldest()) {
+            msg.error = new MessageV2.ContextOverflowError({
+              message: replay
+                ? "Conversation history too large to compact - exceeds model context limit"
+                : "Session too large to compact - context exceeds model limit even after stripping media",
+            }).toObject()
+            msg.finish = "error"
+            yield* session.updateMessage(msg)
+            return "stop"
+          }
+          msg.error = undefined
+          msg.finish = undefined
+          log.info("compaction summary overflowed, cleared oldest tool output and retrying")
         }
 
         if (result === "continue" && input.auto) {
@@ -338,7 +370,7 @@ When constructing the summary, try to stick to this template:
           }
         }
 
-        if (processor.message.error) return "stop"
+        if (msg.error) return "stop"
         if (result === "continue") yield* bus.publish(Event.Compacted, { sessionID: input.sessionID })
         return result
       })

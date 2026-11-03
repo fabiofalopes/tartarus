@@ -3,6 +3,7 @@ import type { GlobalEvent, Event } from "@opencode-ai/sdk/v2"
 import { createSimpleContext } from "./helper"
 import { createGlobalEmitter } from "@solid-primitives/event-bus"
 import { batch, onCleanup, onMount } from "solid-js"
+import { noTimeoutFetch } from "@/util/no-timeout-fetch"
 
 export type EventSource = {
   subscribe: (handler: (event: GlobalEvent) => void) => Promise<() => void>
@@ -25,7 +26,7 @@ export const { use: useSDK, provider: SDKProvider } = createSimpleContext({
         baseUrl: props.url,
         signal: abort.signal,
         directory: props.directory,
-        fetch: props.fetch,
+        fetch: props.fetch ?? noTimeoutFetch,
         headers: props.headers,
       })
     }

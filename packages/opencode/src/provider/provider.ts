@@ -185,6 +185,7 @@ export namespace Provider {
         }),
       opencode: Effect.fnUntraced(function* (input: Info) {
         const env = Env.all()
+        const disableFree = ["1", "true"].includes((Env.get("OPENCODE_DISABLE_FREE_MODELS") ?? "").toLowerCase())
         const hasKey = iife(() => {
           if (input.env.some((item) => env[item])) return true
           return false
@@ -201,9 +202,15 @@ export namespace Provider {
           }
         }
 
+        if (disableFree) {
+          for (const [key, value] of Object.entries(input.models)) {
+            if (value.cost.input === 0) delete input.models[key]
+          }
+        }
+
         return {
           autoload: Object.keys(input.models).length > 0,
-          options: ok ? {} : { apiKey: "public" },
+          options: ok || disableFree ? {} : { apiKey: "public" },
         }
       }),
       openai: () =>

@@ -27,6 +27,7 @@ import { SkillTool } from "../../tool/skill"
 import { BashTool } from "../../tool/bash"
 import { TodoWriteTool } from "../../tool/todo"
 import { Locale } from "../../util/locale"
+import { noTimeoutFetch } from "../../util/no-timeout-fetch"
 
 type ToolProps<T> = {
   input: Tool.InferParameters<T>
@@ -673,7 +674,7 @@ export const RunCommand = cmd({
         const auth = `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`
         return { Authorization: auth }
       })()
-      const sdk = createOpencodeClient({ baseUrl: args.attach, directory, headers })
+      const sdk = createOpencodeClient({ baseUrl: args.attach, directory, headers, fetch: noTimeoutFetch })
       return await execute(sdk)
     }
 
