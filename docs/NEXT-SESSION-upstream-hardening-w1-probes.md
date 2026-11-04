@@ -77,3 +77,25 @@ n=3 full stage-2 matrix** — `bun run eval/battery.ts --model pop-fleet/ornith-
 - Fleet model is `pop-fleet/ornith-35b` (+`-deep`); `ornith-9b` is gone.
 - Harness survey full text is WAF-blocked (preprints.org); README fallback committed;
   OpenReview `nM5tDHrQsx` is the re-fetch avenue.
+
+## Shipped this session (continued): Gateway + multi-model runner
+
+- **`223313eb12`** — OpenAI-compatible gateway in `src/server/instance/openai.ts`:
+  `GET /v1/models` (8,928 models), `POST /v1/chat/completions` (non-streaming JSON;
+  single-chunk SSE for `stream:true`). Verified live: deepseek v4.1 flash returned
+  `GATEWAY-OK` end-to-end through the agent loop. Mounted at `/v1` in InstanceRoutes.
+  Foundation for the "tartarus as gateway/filter in front of any harness" vision;
+  true token streaming + a2a peer transport + MCP aggregation are the next layers.
+- **`ef6d2fb543`** — `eval/multirun.sh`: weighted sweep (half deepseek / quarter glm /
+  rest by price) with a PONG delivery gate per model (doctrine: no behavioral scoring
+  without delivery proof). Runs all stages 1–5 per model.
+- Binary rebuilt from clean `ef6d2fb543`.
+
+## Queue (updated)
+
+- **F1/F2/B1** still first: fleet recovery, matrix re-run, expect-any fix.
+- **Gateway follow-ups**: real SSE token streaming; a2a peer transport; unified MCP
+  tool registry (the #60694 framing work is the foundation).
+- **C1**: haiku-5.5 tool-schema invalid (tools.17 draft-2020-12) — blocks the ideal
+  aligned big-lab control for the SLIP contrast; fix before next comparative run.
+- **C2/C3**: glm-5.3-flash hang (C2) + zai coding-plan auth (C3) — separate issues.
