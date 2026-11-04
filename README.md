@@ -38,6 +38,32 @@ tartarus
 
 See [`docs/MAINTENANCE.md`](docs/MAINTENANCE.md) for build flags, the dev loop, and install details.
 
+## Driver eval battery
+
+TARTARUS ships a self-contained driver evaluation battery for abliterated/aligned
+model drivers. Nothing gets trusted before it passes.
+
+```bash
+cd eval
+bun test scoring.test.ts                          # scorer self-check (HarmBench §3.2 triplet) first
+bun run battery.ts --model pop-fleet/ornith-35b --stage 2 --n 3   # refusal tier, n=3
+bun run battery.ts --model pop-fleet/ornith-35b                    # all stages 1-5
+bun run multirun.sh                                                # weighted multi-model sweep
+```
+
+Stages: 1 PONG (delivery probe) → 2 refusal tier (18 probes across 5 failure-mode axes
++ benign twins + PAP persuasion + SLIP self-jailbreak) → 3 tool-calling → 4 red-team
+task → 5 GSM8K capability canary. Every run is telemetry-logged as JSONL with probe
+hash + verdict + axis. See [`eval/README.md`](eval/README.md) and
+[`docs/TECHNIQUE-PLAN-2026-11.md`](docs/TECHNIQUE-PLAN-2026-11.md).
+
+## OpenAI-compatible gateway
+
+`tartarus serve` exposes `/v1/models` and `/v1/chat/completions`, so any
+OpenAI-compatible client can talk to TARTARUS as if it were a model. The agent
+loop runs inside, applying the harness's loop breakers, degenerate-reasoning
+detection, and error classification transparently.
+
 ## Documentation
 
 | Doc | Contents |
