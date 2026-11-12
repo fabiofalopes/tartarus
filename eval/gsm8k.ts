@@ -11,6 +11,7 @@
 // never edit the sample by hand; determinism is what makes runs comparable.
 
 import { spawn } from "bun"
+import { mkdir } from "node:fs/promises"
 import path from "node:path"
 import os from "node:os"
 
@@ -30,7 +31,7 @@ export async function loadSample(): Promise<Gsm8kItem[] | null> {
 function extractNumber(text: string): string | null {
   // prefer an explicit final-answer marker, else the last bare number
   const marked = text.match(/final answer[^0-9\-.]*(-?[\d,]*\.?\d+)/i)
-  if (marked) return marked[1].replace(/,/g, "")
+  if (marked?.[1]) return marked[1].replace(/,/g, "")
   const nums = text.match(/-?[\d,]*\.?\d+/g)
   return nums ? nums.at(-1)!.replace(/,/g, "") : null
 }
@@ -42,12 +43,12 @@ export async function runItem(
   rep: number,
 ): Promise<{ correct: boolean; got: string | null; text: string }> {
   const dir = path.join(os.tmpdir(), "tartarus-eval", `gsm8k-${Date.now()}-${rep}`)
-  const prompt =
-    `Solve this problem. Reason briefly, then end with a line of the form "Final answer: <number>".\n\n${item.question} [rep ${rep}]`
-  const proc = spawn(
-    [bin, "run", "--model", model, "--agent", agent, "--dir", dir, "--format", "json", prompt],
-    { stdout: "pipe", stderr: "pipe" },
-  )
+  await mkdir(dir, { recursive: true })
+  const prompt = `Solve this problem. Reason briefly, then end with a line of the form "Final answer: <number>".\n\n${item.question} [rep ${rep}]`
+  const proc = spawn([bin, "run", "--model", model, "--agent", agent, "--dir", dir, "--format", "json", prompt], {
+    stdout: "pipe",
+    stderr: "pipe",
+  })
   const timer = setTimeout(() => proc.kill(), 300_000)
   const out = await new Response(proc.stdout).text()
   await new Response(proc.stderr).text()
@@ -74,12 +75,12 @@ export async function runStage(
   onRow: (row: { idx: number; correct: boolean; got: string | null; answer: string }) => void,
 ): Promise<{ accuracy: number; pass: boolean; n: number }> {
   const sample = await loadSample()
-  if (!sample) throw new Error("gsm8k data absent — see eval/README.md (stage 5 skipped)")
+  if (!sample?.length) throw new Error("gsm8k data absent — see eval/README.md (stage 5 skipped)")
   let correct = 0
-  for (let i = 0; i < sample.length; i++) {
-    const r = await runItem(sample[i], model, agent, i + 1)
+  for (const [i, item] of sample.entries()) {
+    const r = await runItem(item, model, agent, i + 1)
     if (r.correct) correct++
-    onRow({ idx: i + 1, correct: r.correct, got: r.got, answer: sample[i].answer })
+    onRow({ idx: i + 1, correct: r.correct, got: r.got, answer: item.answer })
   }
   const accuracy = correct / sample.length
   return { accuracy, pass: accuracy >= PASS_THRESHOLD, n: sample.length }
