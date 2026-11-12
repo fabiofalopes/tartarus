@@ -98,7 +98,13 @@ dump` on a schedule, off-box copies (restic/borg to another node + the Mac),
 5. **Battery matrix completion** on the live surface (stages 1/3/4, loop-
    provocation; stage 5 canary already PASS) + cloud instrument provisioning
    (GLM/MiniMax/DeepSeek) for parseltongue when the owner supplies providers.
-6. Older queue stands: scorer calibration, SLIP/PAP stimulus expansion,
+6. **Kali-station external-tester track** (owner, session close): the Kali-
+   built agentic/container environment (distinct from the pure-Debian habitat
+   station) is the one the owner finally wants **other people to test**.
+   Not this workspace's immediate business — but before external hands touch
+   it: confirm its secrets/seeding hygiene (no credentials baked in images),
+   document the intended test scope, and decide its repo home on Gitea.
+7. Older queue stands: scorer calibration, SLIP/PAP stimulus expansion,
    30B-driver buy-vs-build, scorer rubric second stage.
 
 ## Mechanics that will bite you (all verified this session)
