@@ -71,6 +71,14 @@ station image rebuild.
 
 ## Top open queue (priority order)
 
+0. **GitHub mirror → private** (owner request, session close): stored PAT lacks
+   `administration:write` (HTTP 403 on PATCH visibility). Owner action:
+   github.com/fabiofalopes/tartarus → Settings → General → Danger Zone →
+   "Change repository visibility" → Private. Exposure note of record: the
+   sensitive content (Docker/station/habitat layers) lives in the habitat repo
+   and never touches GitHub; the fork mirror is harness code only, tolerable
+   until flipped.
+
 1. **dev-sys Gitea instance BACKUP** — the forge is now the most important
    server the owner has; it must be alive beyond orcist. Candidates: `gitea
 dump` on a schedule, off-box copies (restic/borg to another node + the Mac),
