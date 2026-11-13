@@ -69,6 +69,35 @@ station image rebuild.
   - token items with proper descriptions; scripts source `~/.config/bw-secrets`
     and pull secrets at use-time; nothing sensitive crosses context.
 
+## Update 2026-11-13 — container deploy + Ableton artifacts recovered
+
+- **Station image rebuild finally completes.** The RE/DFIR layer had NEVER
+  built — three separate build-breakers, each found by execution and fixed in
+  habitat (`313efac`): (1) Kali's `forensics-all` metapackage conflicts with
+  trixie → removed, recorded as an honest gap; (2) the **interpreter trap** —
+  PATH `python3` is the hermes venv (3.14) and cannot see Debian's
+  dist-packages, so every python RE library probed absent even when fully
+  installed → assertions and receipt probes now use `/usr/bin/python3` (3.13),
+  and Debian's pwntools module is `pwnlib`; (3) REA's own `prepare` script
+  (husky + dev-only release-please patch) throws in-image and killed `npm ci`
+  → install with `--ignore-scripts` + explicit `npm rebuild esbuild frida`
+  (dev deps must stay: `tsx` loads `src/*.ts`).
+- **Ableton mission artifacts recovered and BACKED UP** (the "version without
+  remotes" failure): `~/projetos/tartarus-ops` (knowledge base, ontology,
+  handoffs, lab tooling) and `~/mac-projects/re-lab` (cm1/cm2 sources+binaries,
+  the patched arm64 build, silence script, and the results — `decode_hits.txt`
+  3.4 MB, r2 passes, strings, relocs, targets) were **not git repos at all**.
+  Both are now versioned and mirrored to Gitea as `fabio/tartarus-ops` and
+  `fabio/ableton-re-lab`. Large blobs (923 MB payload, 585 MB Live 12
+  binaries, 4.5 GB quarantine) are hash-tracked in `PAYLOAD.md` /
+  `BINARIES.md` — all hashes re-verified 2026-11-13 and matching the mission
+  record exactly.
+- **Owner directive**: the Ableton mission will be **redone from scratch** with
+  current tooling. Everything needed is now versioned and hash-verified; the
+  starting position is in `ARTIFACTS.md` (tartarus-ops).
+
+---
+
 ## Top open queue (priority order)
 
 0. **GitHub mirror → private** (owner request, session close): stored PAT lacks
