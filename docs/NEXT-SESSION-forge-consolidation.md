@@ -156,17 +156,26 @@ dump` on a schedule, off-box copies (restic/borg to another node + the Mac),
 - STATE-OF-PLAY is fleet truth: ornith-35b retired 2026-11-04; live surface =
   lfm2-24b-a2b / lfm3-1.7b / lfm2-8b-a1b / stt.
 
-## Next-session opening prompt (paste-ready)
+## Next-session opening prompt (paste-ready, consolidated 2026-11-13)
 
-> Read `docs/NEXT-SESSION.md` (mission) and
-> `docs/NEXT-SESSION-forge-consolidation.md` (last handoff). Verify state first:
-> `git -C ~/projetos/tartarus status`, `git ls-remote ssh://dev-sys-gitea/fabio/tartarus.git
-refs/heads/2.0` (expect 2a1a6cfa86 or newer), `bw status`. Then the top queue:
-> (1) Gitea backup proposal for the owner's approval, (2) station image rebuild
->
-> - receipt verification, (3) driver-quality decision material. Load the
->   `tartarus-dev` skill. Doctrine: PONG before measurements, telemetry per run,
->   keys only via Vaultwarden scripts, commits after each verified step.
+> Read `docs/NEXT-SESSION.md` (mission — its 2026-11-13 block is the state of
+> record) and this handoff. Verify state first:
+> `git -C ~/projetos/tartarus status` (clean),
+> `git ls-remote ssh://dev-sys-gitea/fabio/tartarus.git refs/heads/2.0`
+> (expect `26c0f21482` or newer),
+> `docker ps --format '{{.Names}} {{.Status}}' | grep tartarus` (tor lane
+> healthy), `bw status` (locked is fine; unlock via `~/.config/bw-secrets`).
+> Then the top queue: (1) **dev-sys instance BACKUP proposal** for approval —
+> the forge is the most important server; (2) GitHub mirror → private (owner
+> one-click UI action, stored PAT lacks administration:write); (3) driver-
+> quality decision on lfm2-24b-a2b; (4) Gitea capability discovery
+> (Actions/CI, dashboards/visualization, packages, webhooks); (5) **Ableton
+> mission redo** — start at `~/projetos/tartarus-ops/ARTIFACTS.md`, both
+> artifact repos are on Gitea, nothing is assumed live; (6) Kali-station
+> external-tester track (secrets hygiene gate first).
+> Load the `tartarus-dev` skill. Doctrine: PONG before measurements, telemetry
+> per run, keys only via Vaultwarden scripts, commits after each verified step,
+> hash before touch, operator owns every sudo act.
 
 ## Standing doctrine (unchanged)
 

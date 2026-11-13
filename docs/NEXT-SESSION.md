@@ -4,6 +4,40 @@
 
 ---
 
+## Update 2026-11-13 (CONSOLIDATED) — station deployed + Ableton recovered
+
+- **Container stack deployed and verified**: `agentic-workspace-fabio` (and its
+  searxng helper) STOPPED; both station images rebuilt 2026-11-13 (clearnet
+  04:56, tor 05:29); **tor lane `tartarus-station-tor-fabio` up and healthy**,
+  smoke 6/7 (only `IsTor` fails — documented as unprovable on this network).
+  The RE/DFIR layer had NEVER built before this session: three build-breakers
+  fixed in habitat (`313efac`, `e612b1a`) — `forensics-all` metapackage
+  conflict, the PATH-python3-is-hermes-venv interpreter trap (all RE libs
+  probed absent → now `/usr/bin/python3` + `pwnlib`), and REA's `prepare`
+  script throwing in-image (`npm ci --ignore-scripts` + explicit esbuild/frida
+  rebuilds; dev deps kept because tsx loads `src/*.ts`). Live receipt now
+  honest: 8 RE tools, `re_python_libs: true`, 5 RE skills seeded, REA engine
+  present, one recorded problem (no ghidra/rizin/radare2 backend).
+- **Ableton mission artifacts recovered + backed up**: `~/projetos/tartarus-ops`
+  and `~/mac-projects/re-lab` were **not git repos at all** — now versioned and
+  mirrored on dev-sys Gitea as `fabio/tartarus-ops` + `fabio/ableton-re-lab`.
+  Big blobs (923 MB payload, 585 MB Live 12 builds, 4.5 GB quarantine) are
+  hash-tracked in `PAYLOAD.md` / `BINARIES.md`, all hashes re-verified and
+  matching the mission record exactly. `ARTIFACTS.md` is the starting position
+  for the owner's directive to **redo the mission from scratch**. The stale
+  ops handoff now carries a read-first 2026-11-13 consolidation block.
+- **Four repos, one forge, all heads mirrored**: `tartarus` `26c0f21482`,
+  `tartarus-habitat` `e612b1a`, `tartarus-ops` `cb54d39`, `ableton-re-lab`
+  `6e31b1e` (plus `fabio/inference-playground`). GitHub mirror retained on the
+  fork; Gitea is primary. Vault re-locked; telemetry complete.
+- **Priority unchanged but now narrowed**: (1) dev-sys instance BACKUP —
+  the forge is the most important server; (2) GitHub mirror → private (owner
+  UI action, recorded as queue item 0); (3) driver-quality decision on
+  lfm2-24b-a2b; (4) Gitea capability discovery; (5) Ableton redo starting
+  from `ARTIFACTS.md`; (6) Kali-station external test track.
+
+---
+
 ## Update 2026-11-12 (recovery + retool + forge consolidation) — read `docs/NEXT-SESSION-forge-consolidation.md`
 
 - **Session close (final)**: dev-sys Gitea (`100.75.113.85:3001/fabio`) is now the **primary home of the workspace** — `fabio/tartarus` (full history, 1170 tags, parity verified), `fabio/tartarus-habitat` and `fabio/inference-playground` (first remote ever, were zero-backup). GitHub origin retained on the fork; Gitea is primary, project stays private either way.
