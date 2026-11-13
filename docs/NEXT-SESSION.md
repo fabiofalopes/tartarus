@@ -2,6 +2,13 @@
 
 > **Read this first.** It tells you exactly where we are, what was measured, and where to go. Load the `tartarus-dev` skill for the operational playbook; this file is the mission.
 
+> **CURRENT MOMENT (2026-11-13)**: read `docs/NEXT-SESSION-station-moment.md`
+> before acting — two temporary clearnet stations (tmpa/tmpb) are live with
+> both model lanes wired (modelos + GLM-5.3-Flash/jkey), tor is **paused**, and
+> **dev-sys Gitea is down** (host pings, :3001/:3101 refuse) so habitat commits
+> `6acb2f7` + `2c117af` are still unpushed. This is a temporary deployment the
+> owner asked for "for a moment"; teardown/restart commands are in that file.
+
 ---
 
 ## Update 2026-11-13 (CONSOLIDATED) — station deployed + Ableton recovered
