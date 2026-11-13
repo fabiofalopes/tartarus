@@ -85,12 +85,20 @@ locked at handoff; unlock via `source ~/.config/bw-secrets` +
 
 **dev-sys Gitea is DOWN at this moment**: host `100.75.113.85` answers ping,
 but `:3001` (web) and `:3101` (SSH) refuse connections — a restart/reboot,
-not data loss. The queued push-retry loop **gave up after 80 attempts**
-(09:28Z), so:
+not data loss. The first queued push-retry loop **gave up after 80 attempts**
+(09:28Z). A fresh loop (`/tmp/push-retry2.sh`, 60 s × 240 = 4 h cap) is now
+active and pushes **both** repos each cycle; confirm with
+`ps -eo args | grep push-retry2` and `tail /tmp/gitea-push-retry.log`.
 
-- `tartarus-habitat` local `2c117af` (and `6acb2f7` before it) is **NOT yet
-  on Gitea** (remote last known `e612b1a`). When the forge returns:
-  `git -C ~/projetos/tartarus-habitat push --no-verify origin main`.
+Pending pushes (all local commits are safe):
+
+- `tartarus-habitat`: local `2c117af` (gitignore temp workspaces) and
+  `6acb2f7` (`glm-endpoint.sh`) — Gitea last known `e612b1a`.
+- `tartarus` fork: local `f0ff47fdb7` (this handoff + mission pointer) is on
+  **GitHub only**; Gitea last known `871f62f591`.
+- When the forge returns manually:
+  `git -C ~/projetos/tartarus-habitat push --no-verify origin main` and
+  `git -C ~/projetos/tartarus push --no-verify ssh://dev-sys-gitea/fabio/tartarus.git 2.0:2.0`.
 - All other repos were mirrored before the outage: `tartarus` `871f62f591`
   (Gitea + GitHub), `tartarus-ops` `be1e171`, `ableton-re-lab` `6e31b1e`,
   `inference-playground`.
